@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pixel World - My Portfolio</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="game-wrap">
+  <div id="game">
+    <!-- CRT 效果层 -->
+    <div class="crt-overlay"></div>
+
+    <!-- 开场画面 -->
+    <div class="intro-screen" id="introScreen">
+      <div class="intro-title">MY PIXEL HOME</div>
+      <div class="intro-subtitle">A LITTLE WORLD ABOUT ME</div>
+      <div class="intro-loading">
+        <div class="intro-loading-bar"></div>
+      </div>
+    </div>
+
+    <!-- 开始提示 -->
+    <div class="start-hint" id="startHint">按任意键开始</div>
+
+    <!-- 背景 -->
+    <div class="cloud cloud1 scene-element" id="cloud1"></div>
+    <div class="cloud cloud2 scene-element" id="cloud2"></div>
+    <div class="cloud cloud3 scene-element" id="cloud3"></div>
+    <div class="hill hill1 scene-element" id="hill1"></div>
+    <div class="hill hill2 scene-element" id="hill2"></div>
+
+    <!-- 房子 -->
+    <div class="house scene-element" id="house">
+      <div class="house-roof"></div>
+      <div class="house-wall"></div>
+      <div class="house-door" id="door">
+        <div class="hint">按空格开门</div>
+      </div>
+      <div class="house-window w1">
+        <div class="hint">技能</div>
+      </div>
+      <div class="house-window w2">
+        <div class="hint">项目</div>
+      </div>
+      <div class="house-chimney">
+        <div class="hint">联系我</div>
+      </div>
+    </div>
+
+    <!-- 树 -->
+    <div class="tree scene-element" id="tree">
+      <div class="tree-trunk"></div>
+      <div class="tree-foliage"></div>
+    </div>
+
+    <!-- 金币 -->
+    <div class="coin scene-element" id="coin">$</div>
+
+    <!-- 下水管 -->
+    <div class="pipe scene-element" id="pipe">
+      <div class="pipe-top"></div>
+      <div class="pipe-body"></div>
+    </div>
+
+    <!-- 地面 -->
+    <div class="ground-wrap scene-element" id="groundWrap">
+      <div class="grass-top"></div>
+      <div class="ground"></div>
+    </div>
+
+    <!-- 小人 -->
+    <div class="player" id="player">
+      <div class="hint" id="hint">按空格</div>
+      <div class="player-hat"></div>
+      <div class="player-head">
+        <div class="player-eye left"></div>
+        <div class="player-eye right"></div>
+      </div>
+      <div class="player-body"></div>
+      <div class="player-leg left"></div>
+      <div class="player-leg right"></div>
+    </div>
+
+    <!-- 操作说明 -->
+    <div class="controls">← → 移动 | 空格 跳跃/互动</div>
+
+    <!-- 触摸按钮 -->
+    <div class="touch-controls">
+      <div class="touch-left-group">
+        <div class="touch-btn" id="btnLeft">◀</div>
+        <div class="touch-btn" id="btnRight">▶</div>
+      </div>
+      <div class="touch-right-group">
+        <div class="touch-btn touch-space" id="btnSpace">空格</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <span class="modal-close" onclick="closeModal()">✕</span>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>

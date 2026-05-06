@@ -1,0 +1,795 @@
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #1a1a2e;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100dvh;
+  font-family: 'Courier New', Courier, monospace;
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ===================== 游戏容器 ===================== */
+#game-wrap {
+  position: relative;
+  width: 960px;
+  height: 540px;
+  transform-origin: top center;
+}
+
+#game {
+  position: relative;
+  width: 960px;
+  height: 540px;
+  background: linear-gradient(180deg, #5c94fc 0%, #7eb8fc 50%, #8ec5fc 70%, #4caf50 70%, #388e3c 100%);
+  border: 4px solid #222;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 8px #333,
+    0 0 0 12px #111,
+    0 20px 60px rgba(0,0,0,0.5);
+}
+
+/* ===================== CRT 扫描线 + 暗角 ===================== */
+.crt-overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  background:
+    radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.25) 100%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,0,0,0.04) 0px,
+      rgba(0,0,0,0.04) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+}
+
+/* ===================== 开场画面 ===================== */
+.intro-screen {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #0d0d1a;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 90;
+  transition: opacity 0.8s ease;
+}
+
+.intro-screen.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-title {
+  font-size: 48px;
+  font-weight: bold;
+  letter-spacing: 4px;
+  color: #ffd700;
+  text-shadow:
+    4px 4px 0 #e70012,
+    8px 8px 0 rgba(0,0,0,0.3);
+  animation: titlePulse 1.5s ease-in-out infinite;
+}
+
+.intro-subtitle {
+  margin-top: 16px;
+  font-size: 14px;
+  color: #aaa;
+  letter-spacing: 2px;
+}
+
+.intro-loading {
+  margin-top: 40px;
+  width: 200px;
+  height: 8px;
+  background: #222;
+  border: 2px solid #444;
+  position: relative;
+  overflow: hidden;
+}
+
+.intro-loading-bar {
+  position: absolute;
+  top: 0; left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #e70012, #ffd700, #00a800);
+  animation: loadBar 2s ease-out forwards;
+}
+
+@keyframes titlePulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.85; }
+}
+
+@keyframes loadBar {
+  0% { width: 0%; }
+  100% { width: 100%; }
+}
+
+.start-hint {
+  position: absolute;
+  bottom: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  color: #fff;
+  letter-spacing: 3px;
+  opacity: 0;
+  transition: opacity 0.5s;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+  animation: blink 1s infinite;
+  z-index: 95;
+}
+
+.start-hint.show {
+  opacity: 1;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* ===================== 场景元素 - 入场动画 ===================== */
+.scene-element {
+  opacity: 0;
+  transition: none;
+}
+
+.scene-element.visible {
+  opacity: 1;
+}
+
+/* 地面 */
+.ground-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  transform: translateY(100%);
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ground-wrap.visible {
+  transform: translateY(0);
+}
+
+.ground {
+  width: 100%;
+  height: 80px;
+  background: repeating-linear-gradient(
+    0deg,
+    #b83a00 0px,
+    #b83a00 16px,
+    #d4723a 16px,
+    #d4723a 32px
+  );
+  border-top: 4px solid #5d2e0c;
+}
+
+.grass-top {
+  width: 100%;
+  height: 12px;
+  background: repeating-linear-gradient(
+    90deg,
+    #4caf50 0px,
+    #4caf50 8px,
+    #66bb6a 8px,
+    #66bb6a 16px
+  );
+}
+
+/* 云 */
+.cloud {
+  position: absolute;
+  background: #fff;
+  opacity: 0;
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.cloud.visible {
+  opacity: 0.85;
+}
+
+.cloud1 {
+  width: 80px; height: 32px;
+  top: 60px; left: 120px;
+  box-shadow: 24px -16px 0 #fff, 48px -8px 0 #fff, 16px 8px 0 #fff, 40px 8px 0 #fff;
+  transform: translateX(-30px);
+}
+
+.cloud1.visible { transform: translateX(0); }
+
+.cloud2 {
+  width: 60px; height: 24px;
+  top: 100px; left: 600px;
+  box-shadow: 20px -12px 0 #fff, 36px -4px 0 #fff, 12px 6px 0 #fff;
+  transform: translateX(30px);
+}
+
+.cloud2.visible { transform: translateX(0); }
+
+.cloud3 {
+  width: 70px; height: 28px;
+  top: 50px; left: 780px;
+  box-shadow: 22px -14px 0 #fff, 42px -6px 0 #fff, 14px 7px 0 #fff;
+  transform: translateX(-20px);
+}
+
+.cloud3.visible { transform: translateX(0); }
+
+/* 山丘 */
+.hill {
+  position: absolute;
+  bottom: 92px;
+  width: 0; height: 0;
+  border-left: 120px solid transparent;
+  border-right: 120px solid transparent;
+  border-bottom: 80px solid #2e7d32;
+  opacity: 0;
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.hill.visible { opacity: 0.7; }
+
+.hill1 { left: 80px; transform: translateY(20px); }
+.hill1.visible { transform: translateY(0); }
+
+.hill2 { left: 600px; border-bottom-color: #388e3c; transform: translateY(20px); }
+.hill2.visible { transform: translateY(0); }
+
+/* ===== 房子 + 投影 ===== */
+.house {
+  position: absolute;
+  bottom: 92px;
+  left: 280px;
+  width: 160px;
+  height: 140px;
+  opacity: 0;
+  transform: translateY(-300px);
+  transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+  filter: drop-shadow(8px 8px 0 rgba(0,0,0,0.18));
+}
+
+.house.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.house-roof {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0; height: 0;
+  border-left: 80px solid transparent;
+  border-right: 80px solid transparent;
+  border-bottom: 60px solid #e70012;
+}
+
+.house-wall {
+  position: absolute;
+  bottom: 0;
+  left: 20px;
+  width: 120px;
+  height: 80px;
+  background: #f5deb3;
+  border: 3px solid #5d4037;
+}
+
+.house-door {
+  position: absolute;
+  bottom: 0;
+  left: 58px;
+  width: 44px;
+  height: 56px;
+  background: #8b4513;
+  border: 3px solid #5d2e0c;
+  transition: transform 0.2s, background 0.2s;
+  transform-origin: left center;
+  cursor: pointer;
+}
+
+.house-door:hover {
+  transform: scale(1.05);
+  background: #a0522d;
+}
+
+.house-door.open {
+  transform: scaleX(0.2);
+  background: #3e2723;
+}
+
+.house-window {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  background: #87ceeb;
+  border: 3px solid #5d4037;
+  transition: transform 0.2s, background 0.2s;
+  cursor: pointer;
+}
+
+.house-window:hover {
+  transform: scale(1.1);
+  background: #b0e0ff;
+}
+
+.house-window.w1 { top: 40px; left: 32px; }
+.house-window.w2 { top: 40px; right: 32px; }
+
+.house-chimney {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 24px;
+  height: 36px;
+  background: #795548;
+  border: 2px solid #4e342e;
+}
+
+/* ===== 树 + 投影 ===== */
+.tree {
+  position: absolute;
+  bottom: 92px;
+  left: 480px;
+  width: 80px;
+  height: 160px;
+  opacity: 0;
+  transform: translateX(-80px);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+  filter: drop-shadow(6px 6px 0 rgba(0,0,0,0.15));
+}
+
+.tree.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.tree:hover .tree-foliage {
+  animation: treeShake 0.4s ease-in-out;
+}
+
+@keyframes treeShake {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+
+.tree-trunk {
+  position: absolute;
+  bottom: 0;
+  left: 28px;
+  width: 24px;
+  height: 60px;
+  background: #795548;
+  border: 2px solid #4e342e;
+}
+
+.tree-foliage {
+  position: absolute;
+  bottom: 50px;
+  left: 0;
+  width: 80px;
+  height: 60px;
+  background: #2e7d32;
+  border: 3px solid #1b5e20;
+  box-shadow: inset -8px -8px 0 rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+  transform-origin: bottom center;
+}
+
+.tree-foliage::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 10px;
+  width: 60px;
+  height: 40px;
+  background: #388e3c;
+  border: 3px solid #1b5e20;
+}
+
+/* ===== 金币 ===== */
+.coin {
+  position: absolute;
+  bottom: 222px;
+  left: 506px;
+  width: 28px;
+  height: 28px;
+  background: #ffd700;
+  border: 3px solid #ff8f00;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ff8f00;
+  opacity: 0;
+  transform: scale(0) rotate(-180deg);
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.coin.visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+}
+
+.coin:hover {
+  transform: scale(1.3) rotate(10deg);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+}
+
+.coin.collected {
+  display: none;
+}
+
+@keyframes coinSpin {
+  0% { transform: scaleX(1); }
+  50% { transform: scaleX(0.1); }
+  100% { transform: scaleX(1); }
+}
+
+@keyframes coinFloat {
+  0%, 100% { transform: translateY(0) scaleX(1); }
+  50% { transform: translateY(-6px) scaleX(1); }
+}
+
+.coin.visible:not(:hover) {
+  animation: coinSpin 1.2s linear infinite, coinFloat 2s ease-in-out infinite;
+}
+
+/* ===== 下水管 + 投影 ===== */
+.pipe {
+  position: absolute;
+  bottom: 92px;
+  left: 800px;
+  width: 80px;
+  height: 130px;
+  opacity: 0;
+  transform: translateX(80px);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+  filter: drop-shadow(7px 7px 0 rgba(0,0,0,0.18));
+}
+
+.pipe.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.pipe-top {
+  position: absolute;
+  top: 0;
+  left: -8px;
+  width: 96px;
+  height: 32px;
+  background: #00a800;
+  border: 3px solid #006600;
+  z-index: 2;
+}
+
+.pipe-body {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  width: 80px;
+  height: 102px;
+  background: #00a800;
+  border: 3px solid #006600;
+  border-top: none;
+}
+
+.pipe-top::after,
+.pipe-body::after {
+  content: '';
+  position: absolute;
+  top: 4px; left: 6px;
+  width: 8px;
+  height: 60%;
+  background: rgba(255,255,255,0.3);
+}
+
+/* ===== 小人 + 投影 ===== */
+.player {
+  position: absolute;
+  bottom: 80px;
+  left: 300px;
+  width: 32px;
+  height: 52px;
+  z-index: 20;
+  --facing: 1;
+  transform: scaleX(var(--facing));
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.2));
+}
+
+.player.visible {
+  opacity: 1;
+  animation: playerJumpIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes playerJumpIn {
+  0% { transform: scaleX(var(--facing)) translateY(-150px); }
+  100% { transform: scaleX(var(--facing)) translateY(0); }
+}
+
+.player-hat {
+  position: absolute;
+  top: 0;
+  left: -2px;
+  width: 36px;
+  height: 10px;
+  background: #e70012;
+  border: 2px solid #8b0000;
+}
+
+.player-hat::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  width: 12px;
+  height: 8px;
+  background: #e70012;
+  border: 2px solid #8b0000;
+  border-bottom: none;
+}
+
+.player-head {
+  position: absolute;
+  top: 8px;
+  left: 4px;
+  width: 24px;
+  height: 20px;
+  background: #ffccaa;
+  border: 2px solid #d4a373;
+}
+
+.player-eye {
+  position: absolute;
+  top: 6px;
+  width: 6px;
+  height: 6px;
+  background: #fff;
+  border: 1px solid #333;
+}
+
+.player-eye.left { left: 4px; }
+.player-eye.right { right: 4px; }
+
+.player-eye::after {
+  content: '';
+  position: absolute;
+  top: 1px; left: 1px;
+  width: 3px; height: 3px;
+  background: #333;
+}
+
+.player-body {
+  position: absolute;
+  top: 26px;
+  left: 4px;
+  width: 24px;
+  height: 18px;
+  background: #e70012;
+  border: 2px solid #8b0000;
+}
+
+.player-body::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 6px;
+  width: 12px;
+  height: 10px;
+  background: #1976d2;
+  border: 1px solid #0d47a1;
+}
+
+.player-leg {
+  position: absolute;
+  bottom: 0;
+  width: 10px;
+  height: 14px;
+  background: #1976d2;
+  border: 2px solid #0d47a1;
+}
+
+.player-leg.left { left: 4px; }
+.player-leg.right { right: 4px; }
+
+/* 走路动画 */
+.player.walking .player-leg.left {
+  animation: legMove 0.3s infinite alternate;
+}
+
+.player.walking .player-leg.right {
+  animation: legMove 0.3s infinite alternate-reverse;
+}
+
+@keyframes legMove {
+  from { transform: translateY(-4px); }
+  to { transform: translateY(2px); }
+}
+
+/* 跳跃姿势 */
+.player.jumping .player-leg.left {
+  transform: translateY(-6px) rotate(-15deg);
+}
+
+.player.jumping .player-leg.right {
+  transform: translateY(-4px) rotate(10deg);
+}
+
+/* ===== 提示气泡 ===== */
+.hint {
+  position: absolute;
+  top: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #000;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  border: 3px solid #000;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+}
+
+.hint::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 8px solid #000;
+}
+
+.door:hover .hint,
+.window:hover .hint,
+.chimney:hover .hint {
+  opacity: 1;
+}
+
+.chimney .hint { top: -34px; }
+
+/* ===== 弹窗 ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+  z-index: 110;
+}
+
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal {
+  background: #f5f5dc;
+  border: 4px solid #333;
+  padding: 28px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 8px 8px 0 rgba(0,0,0,0.3);
+  position: relative;
+}
+
+.modal h2 {
+  font-size: 20px;
+  margin-bottom: 14px;
+  color: #222;
+  border-bottom: 3px solid #333;
+  padding-bottom: 8px;
+}
+
+.modal p, .modal li {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #444;
+  margin-bottom: 8px;
+}
+
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-close:hover { color: #000; }
+
+/* 操作说明 */
+.controls {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  padding: 6px 12px;
+  font-size: 11px;
+  border: 2px solid #fff;
+  z-index: 60;
+}
+
+/* ===== 触摸控制按钮 ===== */
+.touch-controls {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 8px 12px;
+  z-index: 70;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+}
+
+.touch-btn {
+  width: 56px;
+  height: 56px;
+  background: rgba(0,0,0,0.4);
+  border: 3px solid rgba(255,255,255,0.6);
+  border-radius: 12px;
+  color: #fff;
+  font-size: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.touch-btn:active {
+  background: rgba(255,255,255,0.25);
+}
+
+.touch-left-group,
+.touch-right-group {
+  display: flex;
+  gap: 8px;
+}
+
+.touch-space {
+  width: 80px;
+  font-size: 14px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .controls { display: none; }
+  .touch-controls { display: flex; }
+}
